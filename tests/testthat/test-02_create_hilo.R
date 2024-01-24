@@ -33,7 +33,7 @@ test_that("Missing required elements",{
 
 # Clean Run with No Errors ------------------------------------------------
 
-test_that("Missing required elements",{
+test_that("Runs as expected",{
 
   test1 <- qmod::dat1 %>%
     dplyr::select(price:smart_tech)

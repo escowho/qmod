@@ -63,4 +63,37 @@
 #' mean values by year, fuel type, and payment type (not included).
 "dat1"
 
+#' @title \code{mod1} is an example key driver dataset appropriate for modeling
+#'
+#' @description Dataset containing all the necessary variables for running a
+#' key driver analysis.  Based on \code{qmod::dat1} but processed using \code{hilo}
+#' function to create HI and LO versions of predictors
+#'
+#' @format A data frame of 10,408 observations and 17 variables:
+#' \describe{
+#' \item{nps}{NPS Score}
+#' \item{price_HI}{Satisfaction with Price, value 4 or 5}
+#' \item{price_LO}{Satisfaction with Price, value 1 or 2}
+#' \item{billing_HI}{Satisfaction with Billing, value 4 or 5}
+#' \item{billing_LO}{Satisfaction with Billing, value 1 or 2}
+#' \item{payment_options_HI}{Satisfaction with Payment Options, value 4 or 5}
+#' \item{payment_options_LO}{Satisfaction with Payment Options, value 1 or 2}
+#' \item{customer_service_HI}{Satisfaction with Customer Service, value 4 or 5}
+#' \item{customer_service_LO}{Satisfaction with Customer Service, value 1 or 2}
+#' \item{online_account_HI}{Satisfaction with Online Account, value 4 or 5}
+#' \item{online_account_LO}{Satisfaction with Online Account, value 1 or 2}
+#' \item{registration_process_HI}{Satisfaction with Registration Process, value 4 or 5}
+#' \item{registration_process_LO}{Satisfaction with Registration Process, value 1 or 2}
+#' \item{services_products_HI}{Satisfaction with Services Products, value 4 or 5}
+#' \item{services_products_LO}{Satisfaction with Services Products, value 1 or 2}
+#' \item{smart_tech_HI}{Satisfaction with Smart Tech, value 4 or 5}
+#' \item{smart_tech_LO}{Satisfaction with Smart Tech, value 1 or 2}
+#' }
+#' @details
+#'
+#' All Satisfaction ratings (from price through smart_tech) are based on a 5 point
+#' scale where 1 is Very Unsatisfied and 5 is Very Satisfied and all have been
+#' converted into \"_HI\" and \"_LO\" versions using \code{qmod::create_hilo}
+"mod1"
+
 

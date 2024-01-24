@@ -4,14 +4,11 @@
 \alias{refresh}
 \title{Refreshes github install}
 \usage{
-refresh(pack_list = "qmod", dev = FALSE)
+refresh(dev = FALSE)
 }
 \arguments{
-\item{pack_list}{A character vector with the names of packages to update. Default: qmod.}
-
 \item{dev}{A logical to indicate if the development version of qmod should be
-installed.  Will only work if qmod is the only package listed in the pack_list.
-Default: FALSE.}
+installed.  Default: FALSE.}
 }
 \value{
 Nothing, updates package(s).

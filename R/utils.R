@@ -1,4 +1,12 @@
-globalVariables(c(".", ":=", "x", "packageVersion"))
+globalVariables(c(".", ":=", "x", "packageVersion",
+                  "estimate", "term", "p.value", "p.mod", "dir_prob", "or",
+                  "fitted", "prob", "predict", "scen", "nps", "pred", "calibration",
+                  "plus_10",
+                  "billing_HI", "billing_LO", "customer_service_HI", "customer_service_LO",
+                  "nps", "online_account_HI", "online_account_LO", "payment_options_HI",
+                  "payment_options_LO", "price_HI", "price_LO", "registration_process_HI",
+                  "registration_process_LO", "response_id", "services_products_HI",
+                  "services_products_LO", "smart_tech_HI", "smart_tech_LO"))
 
 
 #' Pipe operator
