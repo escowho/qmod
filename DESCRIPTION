@@ -1,6 +1,6 @@
 Package: qmod
 Title: Modeling Helpers used by XM Data Science at Qualtrics
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: 
     person("Matthew", "Sheffer", , "msheffer@qualtrics.com", role = c("aut", "cre"))
 Description: Various helper and convenience functions for modeling tasks used by XM Data Science at Qualtrics.
@@ -10,7 +10,7 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Imports:
     broom,
     cli,

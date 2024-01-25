@@ -21,6 +21,8 @@
 #' that the respondent falls into the Low (\"_LO\") category and all other values
 #' would be assigned a value of 0 to indicate that the respondent does not fall
 #' into the category. Required.
+#' @param keepmissing Logical indicating if missing values should be retained.
+#' Default is FALSE, meaning that any missing data would be coded as zero.
 #' @return Dataframe containing the names of the scales or variables (column names),
 #' one each for the \"_HI\" dichotomy and one for the \"_LO\" dichotomy.
 #' @examples
@@ -38,7 +40,7 @@
 #' @importFrom qpack set_colnames
 #' @importFrom magrittr set_colnames
 
-create_hilo <- function(data=NULL, high=NULL, low=NULL){
+create_hilo <- function(data=NULL, high=NULL, low=NULL, keepmissing=FALSE){
 
   # Checks ------------------------------------------------------------------
 
@@ -52,15 +54,30 @@ create_hilo <- function(data=NULL, high=NULL, low=NULL){
 
   # Function ----------------------------------------------------------------
 
-  recode_high <- function(variable, high=high){
-    dplyr::case_when(variable >= high ~ 1,
-                     .default=0)
+  if (keepmissing==TRUE){
+    recode_high <- function(variable, high=high){
+      dplyr::case_when(variable >= high ~ 1,
+                       variable <  high ~ 0,
+                       .default=NA_real_)
+    }
+
+    recode_low <- function(variable, low=low){
+      dplyr::case_when(variable <= low ~ 1,
+                       variable >  low ~ 0,
+                       .default=NA_real_)
+    }
+  } else {
+    recode_high <- function(variable, high=high){
+      dplyr::case_when(variable >= high ~ 1,
+                       .default=0)
+    }
+
+    recode_low <- function(variable, low=low){
+      dplyr::case_when(variable <= low ~ 1,
+                       .default=0)
+    }
   }
 
-  recode_low <- function(variable, low=low){
-    dplyr::case_when(variable <= low ~ 1,
-                     .default=0)
-  }
 
   dat_h <- data %>%
     haven::zap_labels() %>%

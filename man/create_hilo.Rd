@@ -4,7 +4,7 @@
 \alias{create_hilo}
 \title{create_hilo}
 \usage{
-create_hilo(data = NULL, high = NULL, low = NULL)
+create_hilo(data = NULL, high = NULL, low = NULL, keepmissing = FALSE)
 }
 \arguments{
 \item{data}{Name of the dataframe that contains the rating scales.  Assumes that
@@ -24,6 +24,9 @@ of 2 here would combine values of 1 and 2 assigned a value of 1 to indicate
 that the respondent falls into the Low (\"_LO\") category and all other values
 would be assigned a value of 0 to indicate that the respondent does not fall
 into the category. Required.}
+
+\item{keepmissing}{Logical indicating if missing values should be retained.
+Default is FALSE, meaning that any missing data would be coded as zero.}
 }
 \value{
 Dataframe containing the names of the scales or variables (column names),
