@@ -1,6 +1,48 @@
+#' @title get_coefs
+#' @description Pull key models coefficients from a fit object using \code{broom::tidy}
+#' and creates an tibble that can be exported or used in further analysis.  Will
+#' pull similar but slightly different values if the fit is either an lm or glm
+#' object.  If an lm object from regression, will pull five columns: term (coefficient
+#' name), estimate (regression coefficient), p.value (coefficient p value), rsq
+#' (overall model adjusted r-squared), p.mod (overall model F test).
+#' If a glm object is detected, seven columns are pulled:  term
+#' (coefficient name), estimate (glm estimate), or (Odds Ratio calculated from
+#' the estimate), prob (probability calculated from the Odds Ration), p.value
+#' (coefficient p value), rsq (overall simulated model adjusted r-squared, based
+#' on SSE and calculated by the \code{rsq} package), p.mod (overall model F test
+#' based on /code{ResourceSelection::hoslem.test}.
+#' @param fit The name of the lm or glm fit object from which to pull the values.
+#' Required.
+#' @param type The function will attempt to determine the fit type from the
+#' fit object but it is also possible to specify the model type by using a
+#' character string of either \"lm\" or \"glm\".  Optional.
+#' @param print A logical indicating if the results are to be printed to the screen.
+#' The function will return a tibble, which can be printed to the console, but the
+#' number of rows will be truncated.  The print option defaults to printing all
+#' rows in the dataframe.  Default: FALSE
+#' @return A tibble object with the coefficients summarized in tabular format.
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  fit1 <- lm(qmod::mod1, formula=nps~.)
+#'  get_coefs(fit1)
+#'
+#'  mod2 <- qmod::mod1 %>%
+#'    mutate(nps = dplyr::case_when(nps==100 ~ 1,
+#'                                  nps <100 ~ 0))
+#'
+#'  fit2 <- glm(data=mod2 , formula=nps~., family="binomial")
+#'  get_coefs(fit2)
+#'  }
+#' }
+#' @export
+#' @importFrom cli cli_abort
+#' @importFrom broom tidy glance
+#' @importFrom dplyr mutate select
+#' @importFrom ResourceSelection hoslem.test
+#' @importFrom rsq rsq
 
-
-get_driver_coefs <- function(fit=NULL, type=NULL, print=FALSE){
+get_coefs <- function(fit=NULL, type=NULL, print=FALSE){
 
   # Checks ------------------------------------------------------------------
 
@@ -50,6 +92,8 @@ get_driver_coefs <- function(fit=NULL, type=NULL, print=FALSE){
       select(term, estimate, or, prob, p.value, rsq, p.mod)
 
     if (Sys.getenv("QMOD_TEST")==TRUE){
+      output <- output %>%
+        dplyr::mutate(rsq = ifelse(term=="(Intercept)", 999), NA)
 
     } else {
       output <- output %>%

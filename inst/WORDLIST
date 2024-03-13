@@ -2,6 +2,7 @@ LTR
 NPS
 Qualtrics
 ResourceSelection
+VIF
 XM
 coefs
 dir
@@ -9,7 +10,10 @@ github
 glm
 hilo
 hoslem
+klein
 lm
 magrittr
+multicollinearity
 rsq
 tibble
+vif

@@ -4,7 +4,7 @@
 \alias{get_driver_coefs}
 \title{get_driver_coefs}
 \usage{
-get_driver_coefs(fit = NULL, type = NULL, print = FALSE)
+get_driver_coefs(fit = NULL, type = NULL, glm_inc = NULL, print = FALSE)
 }
 \arguments{
 \item{fit}{The name of the lm or glm fit object from which to pull the values.
@@ -13,6 +13,14 @@ Required.}
 \item{type}{The function will attempt to determine the fit type from the
 fit object but it is also possible to specify the model type by using a
 character string of either \"lm\" or \"glm\".  Optional.}
+
+\item{glm_inc}{The name of a dataframe in the Global Environment that contains
+two variables: term, the names of the coefficients from the model and PLUS, the
+amount to increment the variable to simulate the change in the dependent variable.
+It is recommended that this be reported in drivers analyses instead of the logit,
+the Odds Ratio, or the Probability value.  The default value is .1, which translates
+to an increase of 10\%, assuming that all coefficients represent percentages
+from standard performance scores. Optional.}
 
 \item{print}{A logical indicating if the results are to be printed to the screen.
 The function will return a tibble, which can be printed to the console, but the
@@ -32,7 +40,7 @@ name), estimate (regression coefficient), p.value (coefficient p value), rsq
 (direction problem flag where 1 indicated direction problem, 0 indicates no
 direction problem).  For dir_pro, variables must end with either \"_HI\" or
 \"_LO\" suffix and will assume that HI should be positive and LO should be
-negative.  If a glm object is detected,nine columns are pulled:  term
+negative.  If a glm object is detected, nine columns are pulled:  term
 (coefficient name), estimate (glm estimate), or (Odds Ratio calculated from
 the estimate), prob (probability calculated from the Odds Ration), p.value
 (coefficient p value), rsq (overall simulated model adjusted r-squared, based

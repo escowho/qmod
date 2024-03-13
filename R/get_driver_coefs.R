@@ -8,7 +8,7 @@
 #' (direction problem flag where 1 indicated direction problem, 0 indicates no
 #' direction problem).  For dir_pro, variables must end with either \"_HI\" or
 #' \"_LO\" suffix and will assume that HI should be positive and LO should be
-#' negative.  If a glm object is detected,nine columns are pulled:  term
+#' negative.  If a glm object is detected, nine columns are pulled:  term
 #' (coefficient name), estimate (glm estimate), or (Odds Ratio calculated from
 #' the estimate), prob (probability calculated from the Odds Ration), p.value
 #' (coefficient p value), rsq (overall simulated model adjusted r-squared, based
@@ -23,6 +23,13 @@
 #' @param type The function will attempt to determine the fit type from the
 #' fit object but it is also possible to specify the model type by using a
 #' character string of either \"lm\" or \"glm\".  Optional.
+#' @param glm_inc The name of a dataframe in the Global Environment that contains
+#' two variables: term, the names of the coefficients from the model and PLUS, the
+#' amount to increment the variable to simulate the change in the dependent variable.
+#' It is recommended that this be reported in drivers analyses instead of the logit,
+#' the Odds Ratio, or the Probability value.  The default value is .1, which translates
+#' to an increase of 10%, assuming that all coefficients represent percentages
+#' from standard performance scores. Optional.
 #' @param print A logical indicating if the results are to be printed to the screen.
 #' The function will return a tibble, which can be printed to the console, but the
 #' number of rows will be truncated.  The print option defaults to printing all
@@ -52,7 +59,7 @@
 #' @importFrom tibble tibble
 #' @importFrom purrr map_dfr
 
-get_driver_coefs <- function(fit=NULL, type=NULL, print=FALSE){
+get_driver_coefs <- function(fit=NULL, type=NULL, glm_inc=NULL, print=FALSE){
 
   # Checks ------------------------------------------------------------------
 
@@ -76,6 +83,19 @@ get_driver_coefs <- function(fit=NULL, type=NULL, print=FALSE){
     }
   }
 
+  if (type=="glm" & !is.null(glm_inc)){
+    if (is.data.frame(glm_inc) == FALSE){
+      cli::cli_abort("Specified glm_inc file {glm_inc} must be a dataframe.")
+    }
+
+    if (!"term" %in% colnames(glm) | !"PLUS" %in% colnames(glm_inc)){
+      cli::cli_abort("The glm_inc file is expected to contain only two columns: term, PLUS.  One or both are not found.")
+    }
+  }
+
+  #if type = glm and glm_inc NOT NULL then check that it's a dataframe and that
+  #it contains term and PLUS
+
   # lm function -------------------------------------------------------------
 
   if (type=="lm"){
@@ -85,7 +105,7 @@ get_driver_coefs <- function(fit=NULL, type=NULL, print=FALSE){
                     p.mod = ifelse(term=="(Intercept)", round(broom::glance(fit)$p.value, 2), NA),
                     p.value = round(p.value, 2)) %>%
       dplyr::mutate(dir_prob = dplyr::case_when(stringr::str_detect(term, "_HI") ~ ifelse(estimate < 0, 1, 0),
-                                             TRUE ~ ifelse(estimate > 0, 1, 0))) %>%
+                                                TRUE ~ ifelse(estimate > 0, 1, 0))) %>%
       dplyr::select(term, estimate, p.value, rsq, p.mod, dir_prob)
   }
 
@@ -107,6 +127,9 @@ get_driver_coefs <- function(fit=NULL, type=NULL, print=FALSE){
 
     if (Sys.getenv("QMOD_TEST")==TRUE){
 
+      output <- output %>%
+        dplyr::mutate(rsq = ifelse(term=="(Intercept)", 999), NA)
+
     } else {
       output <- output %>%
         dplyr::mutate(rsq = ifelse(term=="(Intercept)", suppressWarnings(rsq::rsq(fit, type="sse", adj=TRUE)), NA))
@@ -120,12 +143,20 @@ get_driver_coefs <- function(fit=NULL, type=NULL, print=FALSE){
                                term=output$term) %>%
       dplyr::bind_cols(purrr::map_dfr(seq_len(nrow(output)), ~means) )
 
+    #step here
+    if (!is.null(glm_inc)){
+      pred_dat <- dplyr::left_join(pred_dat, glm_inc, by="term")
+    } else {
+      pred_dat <- pred_dat %>%
+        dplyr::mutate(PLUS = .1) %>%
+        dplyr::mutate(PLUS = ifelse(term==("Intercept"), 0, PLUS))
+    }
 
     for (i in 2:nrow(pred_dat)){
       which_col <- pred_dat$term[[i]]
 
       pred_dat <- pred_dat %>%
-        dplyr::mutate_at(which_col, ~ifelse(term==which_col, .+.1, .))
+        dplyr::mutate_at(which_col, ~ifelse(term==which_col, .+PLUS, .))
     }
 
     pred_dat <- pred_dat %>%
