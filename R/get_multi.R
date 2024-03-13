@@ -3,7 +3,8 @@
 #' from \code{mctest::imcdiag}.  It reports the variable, the VIF, variable-specific
 #' R-squared value used in Klein's Rule, the overall model R-squared value, the
 #' difference in the R-square values, then flags indicating if if multicollinearity
-#' is detected from the VIF (vif_detect and klein_detect).
+#' is detected from the VIF (vif_detect is flagged if VIF > 2 and klein_detect
+#' is flagged if r2 > overall r2).
 #' @param fit The name of the lm or glm fit object from which to pull the values.
 #' Required.
 #' @return  A tibble object with the multicollinearity statistics in tabular format.
@@ -30,7 +31,7 @@ get_multi <- function(fit=NULL){
 
   # Function ----------------------------------------------------------------
 
-  vif <- mctest::imcdiag(fit, method="VIF")$idiags %>%
+  vif <- mctest::imcdiag(fit, method="VIF", vif=2)$idiags %>%
     data.frame() %>%
     tibble::rownames_to_column() %>%
     qpack::set_colnames(c("var", "vif", "vif_detect")) %>%

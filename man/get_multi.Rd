@@ -18,7 +18,8 @@ Pull key multicollinearity diagnostics, names VIF and Klein's Rule,
 from \code{mctest::imcdiag}.  It reports the variable, the VIF, variable-specific
 R-squared value used in Klein's Rule, the overall model R-squared value, the
 difference in the R-square values, then flags indicating if if multicollinearity
-is detected from the VIF (vif_detect and klein_detect).
+is detected from the VIF (vif_detect is flagged if VIF > 2 and klein_detect
+is flagged if r2 > overall r2).
 }
 \examples{
 \dontrun{
