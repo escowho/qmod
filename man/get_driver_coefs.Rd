@@ -4,7 +4,13 @@
 \alias{get_driver_coefs}
 \title{get_driver_coefs}
 \usage{
-get_driver_coefs(fit = NULL, type = NULL, glm_inc = NULL, print = FALSE)
+get_driver_coefs(
+  fit = NULL,
+  type = NULL,
+  glm_inc = NULL,
+  reverse_check = FALSE,
+  print = FALSE
+)
 }
 \arguments{
 \item{fit}{The name of the lm or glm fit object from which to pull the values.
@@ -21,6 +27,11 @@ It is recommended that this be reported in drivers analyses instead of the logit
 the Odds Ratio, or the Probability value.  The default value is .1, which translates
 to an increase of 10\%, assuming that all coefficients represent percentages
 from standard performance scores. Optional.}
+
+\item{reverse_check}{A logical indicating if the direction check should be universally
+reversed.  This might be required if the dependent variable is a 0,1 and churn
+is the being predicted, meaning that the direction would should be reversed and
+HI would likely be negative and LO would likely be positive.  Default: FALSE}
 
 \item{print}{A logical indicating if the results are to be printed to the screen.
 The function will return a tibble, which can be printed to the console, but the

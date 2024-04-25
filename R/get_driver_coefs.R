@@ -30,6 +30,10 @@
 #' the Odds Ratio, or the Probability value.  The default value is .1, which translates
 #' to an increase of 10%, assuming that all coefficients represent percentages
 #' from standard performance scores. Optional.
+#' @param reverse_check A logical indicating if the direction check should be universally
+#' reversed.  This might be required if the dependent variable is a 0,1 and churn
+#' is the being predicted, meaning that the direction would should be reversed and
+#' HI would likely be negative and LO would likely be positive.  Default: FALSE
 #' @param print A logical indicating if the results are to be printed to the screen.
 #' The function will return a tibble, which can be printed to the console, but the
 #' number of rows will be truncated.  The print option defaults to printing all
@@ -51,7 +55,7 @@
 #' }
 #' @export
 #' @importFrom cli cli_abort
-#' @importFrom broom tidy glance
+#' @importFrom broom tidy glance augment
 #' @importFrom dplyr mutate case_when select summarize_all bind_cols mutate_at filter pull left_join
 #' @importFrom stringr str_detect
 #' @importFrom rsq rsq
@@ -59,7 +63,8 @@
 #' @importFrom tibble tibble
 #' @importFrom purrr map_dfr
 
-get_driver_coefs <- function(fit=NULL, type=NULL, glm_inc=NULL, print=FALSE){
+get_driver_coefs <- function(fit=NULL, type=NULL, glm_inc=NULL, reverse_check=FALSE,
+                             print=FALSE){
 
   # Checks ------------------------------------------------------------------
 
@@ -88,7 +93,7 @@ get_driver_coefs <- function(fit=NULL, type=NULL, glm_inc=NULL, print=FALSE){
       cli::cli_abort("Specified glm_inc file {glm_inc} must be a dataframe.")
     }
 
-    if (!"term" %in% colnames(glm) | !"PLUS" %in% colnames(glm_inc)){
+    if (!"term" %in% colnames(glm_inc) | !"PLUS" %in% colnames(glm_inc)){
       cli::cli_abort("The glm_inc file is expected to contain only two columns: term, PLUS.  One or both are not found.")
     }
   }
@@ -103,10 +108,20 @@ get_driver_coefs <- function(fit=NULL, type=NULL, glm_inc=NULL, print=FALSE){
       dplyr::mutate(estimate = round(estimate, 3),
                     rsq = ifelse(term=="(Intercept)", round(broom::glance(fit)$adj.r.squared, 3), NA),
                     p.mod = ifelse(term=="(Intercept)", round(broom::glance(fit)$p.value, 2), NA),
-                    p.value = round(p.value, 2)) %>%
-      dplyr::mutate(dir_prob = dplyr::case_when(stringr::str_detect(term, "_HI") ~ ifelse(estimate < 0, 1, 0),
-                                                TRUE ~ ifelse(estimate > 0, 1, 0))) %>%
-      dplyr::select(term, estimate, p.value, rsq, p.mod, dir_prob)
+                    p.value = round(p.value, 2))
+
+    if (reverse_check==TRUE){
+      output <- output %>%
+        dplyr::mutate(dir_prob = dplyr::case_when(stringr::str_detect(term, "_HI") ~ ifelse(estimate > 0, 1, 0),
+                                                  TRUE ~ ifelse(estimate < 0, 1, 0))) %>%
+        dplyr::select(term, estimate, p.value, dir_prob, rsq, p.mod)
+    } else {
+      output <- output %>%
+        dplyr::mutate(dir_prob = dplyr::case_when(stringr::str_detect(term, "_HI") ~ ifelse(estimate < 0, 1, 0),
+                                                  TRUE ~ ifelse(estimate > 0, 1, 0))) %>%
+        dplyr::select(term, estimate, p.value, dir_prob, rsq, p.mod)
+    }
+
   }
 
 
@@ -118,17 +133,26 @@ get_driver_coefs <- function(fit=NULL, type=NULL, glm_inc=NULL, print=FALSE){
       mutate(estimate = round(estimate, 3),
              or = round(exp(estimate), 3),
              prob = round(or/(1+or), 3),
-             rsq = ifelse(term=="(Intercept)", 999, NA),
+             rsq = ifelse(term=="(Intercept)", 999, NA_real_),
              p.mod = ifelse(term=="(Intercept)", round(ResourceSelection::hoslem.test(fit$y, fitted(fit))$p.value, 2), NA),
-             p.value = round(p.value, 2)) %>%
-      dplyr::mutate(dir_prob = dplyr::case_when(stringr::str_detect(term, "_HI") ~ ifelse(or < 1, 1, 0),
-                                                TRUE ~ ifelse(or >= 1, 1, 0))) %>%
-      select(term, estimate, or, prob, p.value, rsq, p.mod, dir_prob)
+             p.value = round(p.value, 2))
+
+    if (reverse_check==TRUE){
+      output <- output %>%
+        dplyr::mutate(dir_prob = dplyr::case_when(stringr::str_detect(term, "_HI") ~ ifelse(estimate > 0, 1, 0),
+                                                  TRUE ~ ifelse(estimate < 0, 1, 0))) %>%
+        dplyr::select(term, estimate, or, prob, p.value, dir_prob, rsq, p.mod)
+    } else {
+      output <- output %>%
+        dplyr::mutate(dir_prob = dplyr::case_when(stringr::str_detect(term, "_HI") ~ ifelse(estimate < 0, 1, 0),
+                                                  TRUE ~ ifelse(estimate > 0, 1, 0))) %>%
+        dplyr::select(term, estimate, or, prob, p.value, dir_prob, rsq, p.mod)
+    }
 
     if (Sys.getenv("QMOD_TEST")==TRUE){
 
       output <- output %>%
-        dplyr::mutate(rsq = ifelse(term=="(Intercept)", 999), NA)
+        dplyr::mutate(rsq = ifelse(term=="(Intercept)", 999, NA_real_))
 
     } else {
       output <- output %>%
@@ -162,14 +186,16 @@ get_driver_coefs <- function(fit=NULL, type=NULL, glm_inc=NULL, print=FALSE){
     pred_dat <- pred_dat %>%
       dplyr::mutate(pred = predict(fit, pred_dat, type="response"))
 
+    dv <- names(broom::augment(fit)[1])
+
     adj <- dplyr::filter(pred_dat, scen==1) %>%
-      dplyr::mutate(calibration = nps - pred) %>%
+      dplyr::mutate(calibration = .[[3]] - pred) %>%
       dplyr::select(calibration) %>%
       dplyr::pull()
 
     pred_dat <- pred_dat %>%
       dplyr::mutate(pred = pred + adj) %>%
-      dplyr::mutate(plus_10 = round(pred - nps, 3)) %>%
+      dplyr::mutate(plus_10 = round(pred - .[[3]], 3)) %>%
       dplyr::select(term, plus_10)
 
     output <- dplyr::left_join(output, pred_dat, by="term")

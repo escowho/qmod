@@ -32,7 +32,7 @@ test_that("lm runs as expected",{
     test1 <- get_driver_coefs(fit1)
   )
 
-  expect_equal(names(test1), c("term", "estimate", "p.value", "rsq", "p.mod", "dir_prob"))
+  expect_equal(names(test1), c("term", "estimate", "p.value", "dir_prob", "rsq", "p.mod"))
 
   expect_equal(test1$estimate, c(-22.838, 20.238, -43.88, 12.707, -13.054, 5.076,
                                  23.235, 32.877, -14.78, 16.65, 12.565, 11.300,
@@ -48,7 +48,7 @@ test_that("output print=TRUE",{
   expect_no_error(
     test1 <- capture.output(get_driver_coefs(fit1, print=TRUE))
   )
-  expect_equal(test1[6], " 3 price_LO                   -43.     0    NA       NA        0")
+  expect_equal(test1[6], " 3 price_LO                   -43.     0           0 NA       NA")
 })
 
 test_that("glm runs as expected",{
@@ -66,8 +66,8 @@ test_that("glm runs as expected",{
     test2 <- get_driver_coefs(fit2)
   )
 
-  expect_equal(names(test2), c("term", "estimate", "or", "prob", "p.value",
-                               "rsq", "p.mod", "dir_prob", "plus_10"))
+  expect_equal(names(test2), c("term", "estimate", "or", "prob", "p.value", "dir_prob",
+                               "rsq", "p.mod", "plus_10"))
 
   expect_equal(test2$estimate, c(-1.937, .798, -.903, .413, -.273, .147, .785,
                                  1.025, -.162, .488, .481, .371, -.138, .196, -.059,
