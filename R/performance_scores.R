@@ -44,7 +44,7 @@ performance_scores <- function(data, high, low){
   if (is.null(high) | is.null(low)){
     cli::cli_abort("Values for both high and low must be specified.")
   }
-c
+
   # Function ----------------------------------------------------------------
 
   recode_hml <- function(variable, high=high, low=low){
