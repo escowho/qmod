@@ -1,6 +1,6 @@
 Package: qmod
 Title: Modeling Helpers used by XM Data Science at Qualtrics
-Version: 0.0.0.9004
+Version: 0.0.0.9005
 Authors@R: 
     person("Matthew", "Sheffer", , "msheffer@qualtrics.com", role = c("aut", "cre"))
 Description: Various helper and convenience functions for modeling tasks used by XM Data Science at Qualtrics.

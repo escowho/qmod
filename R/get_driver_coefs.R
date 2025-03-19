@@ -133,6 +133,7 @@ get_driver_coefs <- function(fit=NULL, type=NULL, glm_inc=NULL, reverse_check=FA
       mutate(estimate = round(estimate, 3),
              or = round(exp(estimate), 3),
              prob = round(or/(1+or), 3),
+             probd = round(prob - .5, 3),
              rsq = ifelse(term=="(Intercept)", 999, NA_real_),
              p.mod = ifelse(term=="(Intercept)", round(ResourceSelection::hoslem.test(fit$y, fitted(fit))$p.value, 2), NA),
              p.value = round(p.value, 2))
